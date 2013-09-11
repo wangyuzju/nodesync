@@ -1,0 +1,34 @@
+{
+  "name": "nodesync",
+  "version": "0.0.1",
+  "description": "node scripts for watching changed files and dirs then post them to remote server",
+  "main": "./lib/nodesync",
+  "directories": {
+    "test": "test"
+  },
+  "bin": {
+    "nodesync": "./bin/nodesync"
+  },
+  "dependencies": {
+    "MD5": "~1.1.0",
+    "form-data": "~0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wangyuzju/nodesync.git"
+  },
+  "keywords": [
+    "node",
+    "autosync",
+    "wacth"
+  ],
+  "author": "wangyuzju",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/wangyuzju/nodesync/issues"
+  }
+}

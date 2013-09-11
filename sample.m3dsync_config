@@ -1,0 +1,9 @@
+{
+  "path": "src/",
+  "type": [
+    "*.js",
+    "*.css"
+  ],
+  "host": "http://config.music.baidu.com/nodesync",
+  "pathto": "/home/bae/luoqin/nodesync/"
+}

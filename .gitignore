@@ -1,0 +1,5 @@
+/.svn
+/lib/node_modules/*
+/.idea
+*.iml
+.m3dsync_config
