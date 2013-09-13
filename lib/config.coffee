@@ -33,7 +33,7 @@ init = ()->
   j = 0
   ret = {}
 
-  stdout.write "#{tips[j]} (默认值'#{process.argv[2] || './'}') \n#{params[j]} :"
+  stdout.write "#{tips[j]} 当前值 \<#{process.argv[2] || './'}\> \n#{params[j]} :"
 
   stdin.on('data', (chunk)->
     if chunk == '\n'
@@ -44,7 +44,7 @@ init = ()->
     j++
 
     if j < i
-      stdout.write "请输入#{tips[j]} (默认值'#{defaultValue[j]}') \n#{params[j]} :"
+      stdout.write "请输入#{tips[j]} 当前值 \<#{defaultValue[j]}\> \n#{params[j]} :"
     else
       j = -1
       while ++j < i

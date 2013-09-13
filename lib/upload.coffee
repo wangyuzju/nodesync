@@ -51,17 +51,18 @@ remote =
         self.connected = true
         console.info "Server: >>>\n\tSuccecc Connected!"
       else
-        console.info "Server: >>>"
+        console.info "Server: >>> #{res.statusCode}"
 
       res.on 'data', (chunk)->
-        console.info "   #{res.statusCode}:\t\u001b[1;36m#{chunk}\u001b[0m"
+        data = JSON.parse chunk
+        console.info " #{data.code}:\t\u001b[1;36m#{data.msg}\u001b[0m"
         console.log ""
     )
 
   _debugInfo: (event, filepath)->
     # send module used for debug
     console.log "  send:\t >>>>>>>>"
-    console.log "\t      op: \u001b[1;4mchange\u001b[0m"
+    console.log "\t      op: \u001b[1;4m#{event}\u001b[0m"
     console.log "\t  pathto: #{@pathTo}"
     console.log "\tfilepath: #{filepath}"
     console.log ""
@@ -71,23 +72,37 @@ remote =
 
     @post
       op: 'change'
-      filepath: fp
-      md5: oid
       to: @pathTo
+      filepath: fp
+
+      md5: oid
       file: fs.createReadStream(fp)
 
   mkdir: (dir) ->
-    @post {mkdir: dir}
+    @_debugInfo 'mkdir', dir
+
+
+    @post
+      op: 'mkdir'
+      to: @pathTo
+      filepath: dir
 
   delete: (fp, oid)->
+    @_debugInfo 'del', fp
+
     @post
-      oid: oid
-      del: fp
+      op: "del"
+      to: @pathTo
+      filepath: fp
 
   move: (fp, oid, nfp) ->
+    @_debugInfo 'mv', "move #{fp} to #{nfp}"
+
     @post
-      mv: fp
+      op: 'mv'
+      to: @pathTo
+      filepath: fp
+      target: nfp
       oid: oid
-      to: nfp
 
 module.exports = remote
