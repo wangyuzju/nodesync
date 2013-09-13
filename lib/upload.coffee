@@ -55,7 +55,10 @@ remote =
 
       res.on 'data', (chunk)->
         data = JSON.parse chunk
-        console.info " #{data.code}:\t\u001b[1;36m#{data.msg}\u001b[0m"
+        switch data.code
+          when '22001' then console.error  " #{data.code}:\t #{data.msg}"
+          when '22000' then console.info " #{data.code}:\t #{data.msg}"
+          else console.log " #{data.code}:\t #{data.msg}"
         console.log ""
     )
 
