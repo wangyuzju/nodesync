@@ -5,6 +5,7 @@ watch = require "watch-project"
 remote = require './upload'
 fc = require './filechange'
 CONFIG = require './config'
+jch = require "jch"
 
 console.error = (s)->
   console.log("\u001b[1;31m#{s}\u001b[0m")
@@ -21,24 +22,21 @@ init = ()->
 
   CONFIG = CONFIG.load(target)
 
+  # first running this program, will ask user to input configuration informatin rather than start watching
   if not CONFIG
     return
 
 
-  CONFIG_LOCAL_WATCH_PATH = path.resolve CONFIG.path
   # check file exists
-  if not fs.existsSync CONFIG_LOCAL_WATCH_PATH
+  if not fs.existsSync CONFIG.path
     console.error "Error: "
-    console.log "\tWatching directory '#{ CONFIG_LOCAL_WATCH_PATH }' is not Exist!"
+    console.log "\tWatching directory '#{ CONFIG.path }' is not Exist!"
     return
 
 
   # init local
-  CONFIG_LOCAL_CHANGE_DIR = path.dirname CONFIG_LOCAL_WATCH_PATH
-  CONFIG_LOCAL_WATCH_DIR = path.basename CONFIG_LOCAL_WATCH_PATH
-  process.chdir CONFIG_LOCAL_CHANGE_DIR
   console.log "Local : >>>"
-  console.log "\tWatching   ... '#{ CONFIG_LOCAL_WATCH_PATH }'"
+  console.log "\tWatching   ... '#{ CONFIG.path }'"
   console.log "\tConnecting ... '#{CONFIG.host}'"
   console.log ""
 
@@ -53,7 +51,7 @@ init = ()->
   #    fc.dispatchEvent watch, data
 
 
-  watch CONFIG_LOCAL_WATCH_DIR, (e)->
+  watch CONFIG.path, (e)->
     #filter .swp files created by vim
     #console.log '\u001b[1;4;35m>>>>>>>>>>>>>>>>>>>\u001b[0m'
     console.log "Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}]"
@@ -65,6 +63,8 @@ init = ()->
         remote.mkdir e.filename
       when 'change', 'create'
         remote.save e.filename, e.oid
+        if (path.basename e.filename)[0...3] is 'jch'
+          jch.parse(e.filename)
       when 'delete', 'rmdir'
         remote.delete e.filename, e.oid
       when 'mvfile', 'mvdir'

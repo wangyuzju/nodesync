@@ -1,6 +1,8 @@
 *.iml
+/lib/node_modules/
 /node_modules/
 /.idea
+/test
 /.gitignore
 /.npmignore
 /.m3dsync_config

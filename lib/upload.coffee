@@ -1,12 +1,14 @@
 http = require 'http'
 fs = require 'fs'
+path = require 'path'
 FormData = require 'form-data'
 
 
 remote =
   connect: (host, pathTo) ->
     @host = host
-    @pathTo = pathTo
+    # 确保上传路径最后的 "/" ，不然如果用户没有指定 "/" 就会出错。
+    @pathTo = path.resolve( pathTo ) + "/"
     do @post
 
   _prepareHTTP: (headers)->
@@ -56,8 +58,8 @@ remote =
       res.on 'data', (chunk)->
         data = JSON.parse chunk
         switch data.code
-          when '22001' then console.error  " #{data.code}:\t #{data.msg}"
-          when '22000' then console.info " #{data.code}:\t #{data.msg}"
+          when 22001 then console.error  " #{data.code}:\t #{data.msg}"
+          when 22000 then console.info " #{data.code}:\t #{data.msg}"
           else console.log " #{data.code}:\t #{data.msg}"
         console.log ""
     )

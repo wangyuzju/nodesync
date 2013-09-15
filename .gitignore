@@ -1,6 +1,8 @@
 /.svn
 /lib/node_modules/*
-/.idea
+node_modules/*
+.idea
+test
 *.iml
 .m3dsync_config
 nodesync.php
