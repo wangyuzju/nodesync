@@ -53,7 +53,7 @@ remote =
         self.connected = true
         console.info "Server: >>>\n\tSuccecc Connected!"
       else
-        console.info "Server: >>> #{res.statusCode}"
+        console.info "Server: >>> #{res.statusCode} (#{(new Date()).toTimeString()})"
 
       res.on 'data', (chunk)->
         data = JSON.parse chunk

@@ -54,7 +54,7 @@ init = ()->
   watch CONFIG.path, (e)->
     #filter .swp files created by vim
     #console.log '\u001b[1;4;35m>>>>>>>>>>>>>>>>>>>\u001b[0m'
-    console.log "Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}]"
+    console.log "Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}] (#{(new Date()).toTimeString()})"
     console.log "   old:\t#{e.oid}"
     console.log "   new:\t#{e.nid || e.oid}"
 
