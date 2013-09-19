@@ -3,10 +3,10 @@ url = require 'url'
 path = require 'path'
 watch = require "watch-project"
 jch = require "jch"
-program = require 'commander'
+params = require 'commander'
 remote = require './upload'
 fc = require './filechange'
-CONFIG = require './config'
+config = require './config'
 
 
 console.error = (s)->
@@ -22,34 +22,36 @@ console.warn = (s)->
 
 
 
-start = (opt)->
+start = (opts)->
 
   target = path.resolve('.m3dsync_config')
 
-  CONFIG = CONFIG.load(target)
-  DEBUG = opt.debug || false;
-
+  conf = config.load(target)
   # first running this program, will ask user to input configuration informatin rather than start watching
-  if not CONFIG
+  if not conf
     return
 
 
-  # check file exists
-  if not fs.existsSync CONFIG.path
+  for key, value of conf
+    opts[key] ?= value
+
+
+  # check watch target file exists
+  if not fs.existsSync opts.path
     console.error "Error: "
-    console.log "\tWatching directory '#{ CONFIG.path }' is not Exist!"
+    console.log "\tWatching directory '#{ opts.path }' is not Exist!"
     return
 
 
   # init local
+  console.warn "[Stable Mode Enable]" if opts.stable
   console.log "Local : >>>"
-  console.log "\tWatching   ... '#{ CONFIG.path }'"
-  console.log "\tConnecting ... '#{CONFIG.host}'"
+  console.log "\tWatching   ... '#{opts.path}'"
+  console.log "\tConnecting ... '#{opts.host}'"
   console.log ""
 
   # init server
-  remote.connect CONFIG.host, CONFIG.pathto, DEBUG
-
+  remote.connect opts.host, opts.pathto, opts.debug
 
   #dispatch events occured during the program is not running
   #watch.ready ()->
@@ -58,11 +60,13 @@ start = (opt)->
   #    fc.dispatchEvent watch, data
 
 
-  watch CONFIG.path, (e)->
+  watch opts.path,
+    stable: opts.stable
+  , (e)->
     #filter .swp files created by vim
     #console.log '\u001b[1;4;35m>>>>>>>>>>>>>>>>>>>\u001b[0m'
     console.log "[#{(new Date()).toTimeString().slice(0,8)}] Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}]"
-    if DEBUG
+    if opts.debug
       console.log "   old:\t#{e.oid}"
       console.log "   new:\t#{e.nid || e.oid}"
 
@@ -90,13 +94,17 @@ start = (opt)->
 
 init = ()->
   # check if enter help mode
-  program
+  params
+    .option('-s, --stable', 'stable mode for supporting old nodejs(0.8) and OSX(10.7)')
+    .option('-f, --force', 'force sync mode ignore without checking file\'s MD5')
+
+
+    .option('-d, --debug', 'show more detailed debug info')
     .version('0.0.6')
-    .option('-f, --force', 'force code sync ignore without checking file\'s MD5')
-    .option('-d, --debug', 'show debug info')
+
     .parse(process.argv)
 
-  start(program)
+  start(params)
 
 
 module.exports.run = init
