@@ -42,6 +42,11 @@ nodesync [src/]
 }
 ```
 
+## 常见错误说明
+
+### Error: watch EMFILE
+OS X系统默认ulimit被设置成256（查看方式：ulimit -n）,调大该值即可：`ulimit -n 16384`
+
 ## TODO
 
 - 添加监控文件类型过滤

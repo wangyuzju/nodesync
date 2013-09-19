@@ -2,10 +2,12 @@ fs = require 'fs'
 url = require 'url'
 path = require 'path'
 watch = require "watch-project"
+jch = require "jch"
+program = require 'commander'
 remote = require './upload'
 fc = require './filechange'
 CONFIG = require './config'
-jch = require "jch"
+
 
 console.error = (s)->
   console.log("\u001b[1;31m#{s}\u001b[0m")
@@ -16,11 +18,16 @@ console.info = (s)->
 console.warn = (s)->
   console.log "\u001b[35m#{s}\u001b[0m"
 
-init = ()->
 
-  target = path.resolve(process.argv[2] || "", '.m3dsync_config')
+
+
+
+start = (opt)->
+
+  target = path.resolve('.m3dsync_config')
 
   CONFIG = CONFIG.load(target)
+  DEBUG = opt.debug || false;
 
   # first running this program, will ask user to input configuration informatin rather than start watching
   if not CONFIG
@@ -41,7 +48,7 @@ init = ()->
   console.log ""
 
   # init server
-  remote.connect CONFIG.host, CONFIG.pathto
+  remote.connect CONFIG.host, CONFIG.pathto, DEBUG
 
 
   #dispatch events occured during the program is not running
@@ -54,9 +61,10 @@ init = ()->
   watch CONFIG.path, (e)->
     #filter .swp files created by vim
     #console.log '\u001b[1;4;35m>>>>>>>>>>>>>>>>>>>\u001b[0m'
-    console.log "Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}] (#{(new Date()).toTimeString()})"
-    console.log "   old:\t#{e.oid}"
-    console.log "   new:\t#{e.nid || e.oid}"
+    console.log "[#{(new Date()).toTimeString().slice(0,8)}] Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}]"
+    if DEBUG
+      console.log "   old:\t#{e.oid}"
+      console.log "   new:\t#{e.nid || e.oid}"
 
     switch e.type
       when 'mkdir'
@@ -77,5 +85,18 @@ init = ()->
   process.on 'SIGINT', ()->
     #fs.writeFileSync '.m3ddata', watch.status()
     do process.exit
+
+
+
+init = ()->
+  # check if enter help mode
+  program
+    .version('0.0.6')
+    .option('-f, --force', 'force code sync ignore without checking file\'s MD5')
+    .option('-d, --debug', 'show debug info')
+    .parse(process.argv)
+
+  start(program)
+
 
 module.exports.run = init

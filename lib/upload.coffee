@@ -3,37 +3,15 @@ fs = require 'fs'
 path = require 'path'
 FormData = require 'form-data'
 
+DEBUG = false
 
 remote =
-  connect: (host, pathTo) ->
+  connect: (host, pathTo, debug) ->
+    DEBUG = debug
     @host = host
     # 确保上传路径最后的 "/" ，不然如果用户没有指定 "/" 就会出错。
     @pathTo = path.resolve( pathTo ) + "/"
-    do @post
-
-  _prepareHTTP: (headers)->
-    @option.headers = headers
-    self = @
-
-    req = http.request @option
-
-    req.on 'response', (res) ->
-      if not self.connected
-        self.connected = true
-        console.info "Server: >>>\n\tSuccecc Connected!"
-      else
-        console.info "Server: >>>"
-
-      res.setEncoding 'utf8'
-      res.on 'data', (chunk)->
-        console.info "   #{res.statusCode}:\t\u001b[1;36m#{chunk}\u001b[0m"
-        console.log ""
-    req.on 'error', (err)->
-
-      console.error "#{err.code} 无法连接 \"#{self.option.host}\" ..."
-      console.error err
-
-    return req
+    @post {op: "init"}
 
   post: (opts) ->
     self = @
@@ -42,7 +20,6 @@ remote =
       #if the value is empty will cause form_data.js error
       form.append key, value if value
 
-    #form.pipe (@_prepareHTTP form.getHeaders())
     form.submit(@host, (err, res)->
       if err
         # connect failed
@@ -51,17 +28,20 @@ remote =
 
       if not self.connected
         self.connected = true
-        console.info "Server: >>>\n\tSuccecc Connected!"
+        console.info "Server: >>> "
       else
-        console.info "Server: >>> #{res.statusCode} (#{(new Date()).toTimeString()})"
+        if DEBUG
+          logPrefix = "[#{(new Date()).toTimeString().slice(0, 8)}] Server: >>> \n\t"
+        else
+          logPrefix = "[#{(new Date()).toTimeString().slice(0, 8)}] Server: >>>"
 
       res.on 'data', (chunk)->
         data = JSON.parse chunk
         switch data.code
-          when 22001 then console.error  " #{data.code}:\t #{data.msg}"
-          when 22000 then console.info " #{data.code}:\t #{data.msg}"
-          else console.log " #{data.code}:\t #{data.msg}"
-        console.log ""
+          when 22001 then console.error  "#{logPrefix} #{data.msg}"
+          when 22000 then console.info "#{logPrefix} #{data.msg}"
+          else console.log "\t#{data.msg}"
+        #console.log ""
     )
 
   _debugInfo: (event, filepath)->
@@ -73,7 +53,8 @@ remote =
     console.log ""
 
   save: (fp, oid) ->
-    @_debugInfo 'change', fp
+    if DEBUG
+      @_debugInfo 'change', fp
 
     @post
       op: 'change'
@@ -84,7 +65,8 @@ remote =
       file: fs.createReadStream(fp)
 
   mkdir: (dir) ->
-    @_debugInfo 'mkdir', dir
+    if DEBUG
+      @_debugInfo 'mkdir', dir
 
 
     @post
@@ -93,7 +75,8 @@ remote =
       filepath: dir
 
   delete: (fp, oid)->
-    @_debugInfo 'del', fp
+    if DEBUG
+      @_debugInfo 'del', fp
 
     @post
       op: "del"
@@ -101,7 +84,8 @@ remote =
       filepath: fp
 
   move: (fp, oid, nfp) ->
-    @_debugInfo 'mv', "move #{fp} to #{nfp}"
+    if DEBUG
+      @_debugInfo 'mv', "move #{fp} to #{nfp}"
 
     @post
       op: 'mv'
