@@ -100,7 +100,7 @@ init = ()->
 
 
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.6')
+    .version('0.0.8')
 
     .parse(process.argv)
 

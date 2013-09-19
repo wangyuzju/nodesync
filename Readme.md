@@ -50,3 +50,6 @@ OS X系统默认ulimit被设置成256（查看方式：ulimit -n）,调大该值
 ## TODO
 
 - 添加监控文件类型过滤
+
+# change log
+1. 0.0.7 add stable mode (using "chokidar") for supporting old version of nodejs(0.8) and OSX(10.7)
