@@ -1,5 +1,4 @@
 fs = require 'fs'
-url = require 'url'
 path = require 'path'
 watch = require "watch-project"
 jch = require "jch"
@@ -20,38 +19,28 @@ console.warn = (s)->
 
 
 
-
-
-start = (opts)->
-
-  target = path.resolve('.m3dsync_config')
-
-  conf = config.load(target)
-  # first running this program, will ask user to input configuration informatin rather than start watching
-  if not conf
-    return
-
-
-  for key, value of conf
-    opts[key] ?= value
-
+startWatch = (opts)->
 
   # check watch target file exists
   if not fs.existsSync opts.path
     console.error "Error: "
-    console.log "\tWatching directory '#{ opts.path }' is not Exist!"
+    console.log "\tDirectory '#{ opts.path }' is not Exist!"
     return
 
 
   # init local
-  console.warn "[Stable Mode Enable]" if opts.stable
+  console.warn "[Beta Mode Enable: works well on linux]" if opts.beta
   console.log "Local : >>>"
-  console.log "\tWatching   ... '#{opts.path}'"
-  console.log "\tConnecting ... '#{opts.host}'"
+  console.log "\tWatching : '#{opts.path}'"
+  console.log "\tConnect to: '#{opts.host}'"
+  #console.log "\tConnecting ... '#{opts.host}'"
   console.log ""
 
   # init server
-  remote.connect opts.host, opts.pathto, opts.debug
+  remote.connect opts.host, opts.pathto, opts.force, opts.debug
+
+  #init flie filter
+  filter = new Filter (opts.ignore)
 
   #dispatch events occured during the program is not running
   #watch.ready ()->
@@ -61,9 +50,14 @@ start = (opts)->
 
 
   watch opts.path,
-    stable: opts.stable
+    stable: !opts.beta
   , (e)->
-    #filter .swp files created by vim
+    #filter ignored files
+    start = new Date()
+    if filter.match (path.basename(e.filename))
+      console.log(new Date() - start)
+      return
+
     #console.log '\u001b[1;4;35m>>>>>>>>>>>>>>>>>>>\u001b[0m'
     console.log "[#{(new Date()).toTimeString().slice(0,8)}] Local: >>>\u001b[1;4m#{e.type}\u001b[0m [#{e.filename}]"
     if opts.debug
@@ -84,7 +78,6 @@ start = (opts)->
       else
 
 
-
   #save watch status for trigger change events next time
   process.on 'SIGINT', ()->
     #fs.writeFileSync '.m3ddata', watch.status()
@@ -92,19 +85,110 @@ start = (opts)->
 
 
 
-init = ()->
-  # check if enter help mode
+initMain = ()->
+  # handle command-line args
   params
-    .option('-s, --stable', 'stable mode for supporting old nodejs(0.8) and OSX(10.7)')
     .option('-f, --force', 'force sync mode ignore without checking file\'s MD5')
 
-
+    .option('-b, --beta', 'enter beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
     .version('0.0.8')
 
     .parse(process.argv)
 
-  start(params)
+
+  conf = config.load( path.resolve('.m3dsync_config') )
+  # first running this program, will ask user to input configuration informatin rather than start watching
+  if true
+    #
+    for key, value of conf
+      params[key] ?= value
+
+    # startWatch
+    startWatch(params)
 
 
-module.exports.run = init
+parseArgv = ()->
+  switch process.argv[2]
+    when 'resolve'
+      console.log "resolve conflict!"
+      # fix sync error through svn
+    else
+      # enter the main sync program
+      initMain()
+
+module.exports.run = parseArgv
+
+### #   # ##### ##### ####   #   #   #   #
+ #  ##  #   #   #     #   #  ##  #       #
+ #  # # #   #   ####  #  #   # # #  ###  #
+ #  #  ##   #   #     #   #  #  ##       #
+### #   #   #   ##### #    # #   # #   # #####
+
+# matched pattern container solving IDs with same length such as ".swp" and ".bak"
+class MatchContainer
+  constructor: ()->
+    @matchList = {}
+    # used to store ids with same length
+    #@idList = {}
+
+  add: (l, val)->
+    if @matchList[l]
+      @matchList[l][val] = true
+    else
+      @matchList[l] = {}
+      @matchList[l][value] = true
+
+
+# check if a filenamre matched
+class Filter
+  constructor: (@config)->
+    @prepare()
+
+
+
+  addMatch: (obj, l, value)->
+    if obj[l]
+      obj[l][value] = true
+    else
+      obj[l] = {}
+      obj[l][value] = true
+
+
+  prepare: ()->
+    @leftMatch = {}
+    @rightMatch = {}
+    @totalMatch = {}
+    for val in @config
+      if val[0] is "*"
+        # right hand check list
+        @addMatch (@rightMatch, val.length - 1, val[1...])
+        #@rightMatch[val.length - 1] = val[1..]
+      else if val[-1..] is "*"
+        # left hand ckeck list
+        @addMatch (@leftMatch, val.length - 1, val[0...-1])
+        #@leftMatch[val.length - 1] = val[0...-1]
+      else
+        @totalMatch[val.length] = val
+
+  match: (s)->
+    console.log s
+    console.log (@leftMatch)
+    l = s.length
+    # right side check first for it's much common
+    for len, matchList of @rightMatch
+      break if len >= l
+      console.info (len)
+      return true if matchList[ s.slice(-len) ]
+    # left side check
+    for len, matchList of @leftMatch
+      break if len >= l
+      console.error (len)
+      return true if matchList[ s.slice(0, len) ]
+    # full check
+    return true if @totalMatch[l]
+    return false
+
+
+
+filter = ()->
