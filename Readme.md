@@ -8,12 +8,17 @@
 npm install -g nodesync
 ```
 
-
 ## Usage
 
 ```
 nodesync [src/]
 ```
+开始监控并自动同步改动文件
+
+```
+nodesync config
+```
+根据当前的配置文件，重新设置配置文件
 
 ## Init && Configuration
 
@@ -23,7 +28,7 @@ nodesync [src/]
 1. 切换**项目根目录** ~/workspace/music-branch-119/（其实任意，只要下此还在该目录调用nodesync就行，不然会找不到配置文件）
 2. 第一次执行，需要输入以下配置信息（根据提示的默认值酌情修改）
   + path: 需要监控的本地文件夹的相对路径（如：src/site/）
-  + type: <del>暂时不支持</del>，回车即可
+  + ignore: 忽略监控的文件类型（如: "*.swp, *.bak"）
   + host: 服务器接收脚本URL，回车即可
   + pathto: 项目文件存放到服务器上的绝对路径。（**/bae/home/user/branch/music/**）
 3. 提示配置文件.m3dsync_config保存成功，后续可直接通过该文件修改配置
@@ -44,12 +49,15 @@ nodesync [src/]
 
 ## 常见错误说明
 
-### Error: watch EMFILE
+### Error: watch EMFILE: Too many opened files.
 OS X系统默认ulimit被设置成256（查看方式：ulimit -n）,调大该值即可：`ulimit -n 16384`
 
 ## TODO
+- <del>添加监控文件类型过滤</del>
+- 自动冲突解决、冲突提示强制覆盖
+- 离线文件改动监测
 
-- 添加监控文件类型过滤
 
 # change log
+2. 0.0.10 add file filter feature
 1. 0.0.7 add stable mode (using "chokidar") for supporting old version of nodejs(0.8) and OSX(10.7)

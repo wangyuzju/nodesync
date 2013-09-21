@@ -1,12 +1,20 @@
 fs = require 'fs'
 path = require 'path'
-initConfig = require './config_sample'
 
 
-init = ()->
-  console.log  "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  console.info "第一次使用程序，没有找到当前项目的配置文件，请按照提示输入相应参数 ..."
-  console.log  "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+genConfFromSample = (confFile)->
+  initConfig = require './config_sample'
+
+  if !confFile
+    console.log  "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    console.info "第一次使用程序，没有找到当前项目的配置文件，请按照提示输入相应参数 ..."
+    console.log  "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  else
+    # rewrite initConfig.conf with user defined configuratin file
+    try
+      initConfig.conf = JSON.parse(fs.readFileSync confFile)
+    catch
+      console.error "the configuration file '#{confFile}' is not a valid JSON file, please check the syntax"
 
 
   stdin = process.stdin
@@ -19,13 +27,11 @@ init = ()->
   defaultValue = []
   resultValue = []
 
-  tips = initConfig._tips
-  delete initConfig._tips
-
+  tips = initConfig.desc
 
   i = 0
 
-  for key, value of initConfig
+  for key, value of initConfig.conf
     params[i] = key
     defaultValue[i] = value
     i++
@@ -33,18 +39,18 @@ init = ()->
   j = 0
   ret = {}
 
-  stdout.write "#{tips[j]} 当前值 \<#{process.argv[2] || './'}\> \n#{params[j]} :"
+  stdout.write "#{tips[j]} 当前值 \"#{defaultValue[j]}\" \n#{params[j]} :"
 
   stdin.on('data', (chunk)->
     if chunk == '\n'
       resultValue[j] = defaultValue[j]
     else
-      resultValue[j] = chunk.trim()
+      resultValue[j] = chunk.trim().replace(/^["']/, '').replace(/["']$/, '')
 
     j++
 
     if j < i
-      stdout.write "请输入#{tips[j]} 当前值 \<#{defaultValue[j]}\> \n#{params[j]} :"
+      stdout.write "请输入#{tips[j]} 当前值 \"#{defaultValue[j]}\" \n#{params[j]} :"
     else
       j = -1
       while ++j < i
@@ -64,9 +70,6 @@ init = ()->
 
 
 loadConfig = (confFile)->
-
-  DEFAULT_CONFIG_FILE_PATH = '../sample.m3dsync_config'
-
   #读取配置文件信息
   try
     config = fs.readFileSync(confFile)
@@ -81,17 +84,10 @@ loadConfig = (confFile)->
       return
   catch e
     # no configuration file yet, ask user to input!
-    init()
+    genConfFromSample()
     return undefined
-    #config = JSON.parse fs.readFileSync(DEFAULT_CONFIG_FILE_PATH)
-#
-#    console.warn "Can't find configuration file is the current directory: "
-#    console.log "\t#{target}"
-#    console.warn "Use default conf(\"#{path.resolve DEFAULT_CONFIG_FILE_PATH}\"):"
-#    console.log "\thost  : #{CONFIG.server.host}"
-#    console.log "\tpathto: #{CONFIG.server.pathto}"
-#    console.log ""
 
 
-
-module.exports.load = loadConfig
+module.exports =
+  load: loadConfig
+  create: genConfFromSample

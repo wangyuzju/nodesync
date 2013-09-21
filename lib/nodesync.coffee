@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require 'path'
 watch = require "watch-project"
 jch = require "jch"
-params = require 'commander'
+program = require 'commander'
 remote = require './upload'
 fc = require './filechange'
 config = require './config'
@@ -30,7 +30,7 @@ startWatch = (opts)->
   # check watch target file exists
   if not fs.existsSync opts.path
     console.error "Error: "
-    console.log "\tDirectory '#{ opts.path }' is not Exist!"
+    console.log "\tDirectory '#{ opts.path }' to watch is not Exist!"
     return
 
 
@@ -46,7 +46,7 @@ startWatch = (opts)->
   remote.connect opts.host, opts.pathto, opts.force, opts.debug
 
   #init flie filter
-  filter = new Filter (opts.ignore)
+  filter = new Filter (opts.ignore.replace(/,\s/g, ",").split(','))
 
   #dispatch events occured during the program is not running
   #watch.ready ()->
@@ -93,20 +93,23 @@ startWatch = (opts)->
 ###
 
 initMain = ()->
-  # handle command-line args
-  params
-    .option('-f, --force', 'force sync mode ignore without checking file\'s MD5')
 
-    .option('-b, --beta', 'enter beta version, only stable on linux')
+  program
+    .option('', '')
+    .option('resolve', 'resolve file conflict through svn')
+    .option('config', 'modify configuration file')
+    .option('', '')
+    .option('-f, --force', 'force sync mode, without checking file\'s MD5')
+    .option('-b, --beta', 'beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.8')
+    .version('0.0.10', '-v, --version')
 
-    .parse(process.argv)
 
+  params = program.parse(process.argv)
 
   conf = config.load( path.resolve('.m3dsync_config') )
   # first running this program, will ask user to input configuration informatin rather than start watching
-  if true
+  if conf
     #
     for key, value of conf
       params[key] ?= value
@@ -119,10 +122,17 @@ initMain = ()->
   run different part of the nodesync program, such as resolve conflicts ...
 ###
 parseArgv = ()->
+  program
   switch process.argv[2]
     when 'resolve'
       console.log "resolve conflict!"
       # fix sync error through svn
+    when 'config'
+      confFile = path.resolve '.m3dsync_config'
+      if fs.existsSync confFile
+        config.create (path.resolve '.m3dsync_config')
+      else
+        config.create()
     else
       # enter the main sync program
       initMain()
