@@ -1,6 +1,6 @@
 fs = require 'fs'
 path = require 'path'
-
+EOL = require 'os'.EOL
 
 genConfFromSample = (confFile)->
   initConfig = require './config_sample'
@@ -42,7 +42,7 @@ genConfFromSample = (confFile)->
   stdout.write "#{tips[j]} 当前值 \"#{defaultValue[j]}\" \n#{params[j]} :"
 
   stdin.on('data', (chunk)->
-    if chunk == '\n'
+    if chunk == EOL
       resultValue[j] = defaultValue[j]
     else
       resultValue[j] = chunk.trim().replace(/^["']/, '').replace(/["']$/, '')
