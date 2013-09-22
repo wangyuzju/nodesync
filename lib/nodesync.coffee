@@ -46,7 +46,13 @@ startWatch = (opts)->
   remote.connect opts.host, opts.pathto, opts.force, opts.debug
 
   #init flie filter
-  filter = new Filter (opts.ignore.replace(/,\s/g, ",").split(','))
+  if opts.ignore
+    filter = new Filter (opts.ignore and opts.ignore.replace(/,\s/g, ",").split(','))
+    preCheck = (s)->
+      filter.match(s)
+  else
+    preCheck = ()->
+      return false
 
   #dispatch events occured during the program is not running
   #watch.ready ()->
@@ -60,7 +66,7 @@ startWatch = (opts)->
     withHidden: opts.hidden
   , (e)->
     #filter ignored files
-    if filter.match (path.basename(e.filename))
+    if preCheck (path.basename(e.filename))
       return
 
     #console.log '\u001b[1;4;35m>>>>>>>>>>>>>>>>>>>\u001b[0m'
