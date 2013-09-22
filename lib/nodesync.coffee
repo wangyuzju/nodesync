@@ -57,6 +57,7 @@ startWatch = (opts)->
 
   watch opts.path,
     stable: !opts.beta
+    withHidden: opts.hidden
   , (e)->
     #filter ignored files
     if filter.match (path.basename(e.filename))
@@ -100,9 +101,10 @@ initMain = ()->
     .option('config', 'modify configuration file')
     .option('', '')
     .option('-f, --force', 'force sync mode, without checking file\'s MD5')
+    .option('-h, --hidden', 'watch hidden files and dirs as well')
     .option('-b, --beta', 'beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.10', '-v, --version')
+    .version('0.0.11', '-v, --version')
 
 
   params = program.parse(process.argv)
