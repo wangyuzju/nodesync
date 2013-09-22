@@ -3,6 +3,7 @@ fs = require 'fs'
 path = require 'path'
 FormData = require 'form-data'
 
+
 DEBUG = false
 
 remote =
@@ -15,7 +16,7 @@ remote =
       @force = 'false'
     @host = host
     # 确保上传路径最后的 "/" ，不然如果用户没有指定 "/" 就会出错。
-    @pathTo = path.resolve( pathTo ) + "/"
+    @pathTo = pathTo + "/"
     @post {op: "init"}
 
 
