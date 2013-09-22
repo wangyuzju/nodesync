@@ -110,7 +110,7 @@ initMain = ()->
     .option('-h, --hidden', 'watch hidden files and dirs as well')
     .option('-b, --beta', 'beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.11', '-v, --version')
+    .version('0.0.12', '-v, --version')
 
 
   params = program.parse(process.argv)

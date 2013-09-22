@@ -1,9 +1,9 @@
 fs = require 'fs'
 path = require 'path'
-EOL = require 'os'.EOL
+EOL = (require 'os').EOL
 
 genConfFromSample = (confFile)->
-  initConfig = require './config_sample'
+  initConfig = require 'config_sample'
 
   if !confFile
     console.log  "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"

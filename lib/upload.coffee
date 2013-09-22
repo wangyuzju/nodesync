@@ -61,6 +61,10 @@ remote =
     )
 
   save: (fp, oid) ->
+    # read before path sep resolving
+    file = fs.createReadStream(fp)
+    # resolve path sep on win*
+    fp = fp.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: 'change'
       force: @force
@@ -68,9 +72,10 @@ remote =
       filepath: fp
 
       md5: oid
-      file: fs.createReadStream(fp)
+      file: file
 
   mkdir: (dir) ->
+    dir = dir.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: 'mkdir'
       force: @force
@@ -78,6 +83,7 @@ remote =
       filepath: dir
 
   delete: (fp, oid)->
+    fp = fp.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: "del"
       force: @force
@@ -85,6 +91,7 @@ remote =
       filepath: fp
 
   move: (fp, oid, nfp) ->
+    fp = fp.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: 'mv'
       force: @force
