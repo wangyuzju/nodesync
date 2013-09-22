@@ -106,11 +106,12 @@ initMain = ()->
     .option('resolve', 'resolve file conflict through svn')
     .option('config', 'modify configuration file')
     .option('', '')
+    .option('-p, --path <dir>', 'specifies dir path to be watched')
     .option('-f, --force', 'force sync mode, without checking file\'s MD5')
     .option('-h, --hidden', 'watch hidden files and dirs as well')
     .option('-b, --beta', 'beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.12', '-v, --version')
+    .version('0.0.14', '-v, --version')
 
 
   params = program.parse(process.argv)
