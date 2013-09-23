@@ -11,9 +11,10 @@ remote =
     DEBUG = debug
 
     if force
-      @force = 'true'
+      @force = true
     else
-      @force = 'false'
+      @force = false
+
     @host = host
     # 确保上传路径最后的 "/" ，不然如果用户没有指定 "/" 就会出错。
     @pathTo = pathTo + "/"
@@ -30,8 +31,8 @@ remote =
 
 
   post: (opts) ->
+    opts.force = 'true' if @force
     @_debugInfo opts if DEBUG
-
 
     self = @
     form = new FormData()
@@ -67,7 +68,6 @@ remote =
     fp = fp.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: 'change'
-      force: @force
       to: @pathTo
       filepath: fp
 
@@ -78,7 +78,6 @@ remote =
     dir = dir.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: 'mkdir'
-      force: @force
       to: @pathTo
       filepath: dir
 
@@ -86,7 +85,6 @@ remote =
     fp = fp.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: "del"
-      force: @force
       to: @pathTo
       filepath: fp
 
@@ -94,7 +92,6 @@ remote =
     fp = fp.replace(/\\/g, '/') if path.sep is '\\'
     @post
       op: 'mv'
-      force: @force
       to: @pathTo
       filepath: fp
       target: nfp
