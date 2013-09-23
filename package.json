@@ -1,6 +1,6 @@
 {
   "name": "nodesync",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "node scripts for watching changed files and dirs then post them to remote server",
   "main": "./lib/nodesync",
   "directories": {
