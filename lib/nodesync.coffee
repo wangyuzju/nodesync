@@ -19,7 +19,7 @@ console.info = (s)->
   console.log "\u001b[36m#{s}\u001b[0m"
 # used for log important messages
 console.warn = (s)->
-  console.log "\u001b[35m#{s}\u001b[0m"
+  console.log "\u001b[1;35m#{s}\u001b[0m"
 
 
 ###
@@ -39,10 +39,12 @@ startWatch = (opts)->
   console.log "Local : >>>"
   console.log "\tWatching : '#{opts.path}'"
   console.log "\tConnect to: '#{opts.host}'"
+  console.warn "\tSync File To: '#{opts.pathto}'"
+
   #console.log "\tConnecting ... '#{opts.host}'"
   console.log ""
-
   # init server
+
   remote.connect opts.host, opts.pathto, opts.force, opts.debug
 
   #init flie filter
@@ -111,7 +113,7 @@ initMain = ()->
     .option('-h, --hidden', 'watch hidden files and dirs as well')
     .option('-b, --beta', 'beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.17', '-v, --version')
+    .version('0.0.19', '-v, --version')
 
 
   params = program.parse(process.argv)
