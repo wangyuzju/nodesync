@@ -1,7 +1,6 @@
 fs = require 'fs'
 path = require 'path'
 watch = require "watch-project"
-jch = require "jch"
 program = require 'commander'
 remote = require './upload'
 fc = require './filechange'
@@ -27,12 +26,23 @@ console.warn = (s)->
 ###
 
 startWatch = (opts)->
+  # check configurations before start
+  if !opts.host
+    console.error "Please specific [ host ] in the configuration file!"
+    process.exit()
+  if !opts.pathto
+    console.error "Please specific [ pathto ] in the configuration file!"
+    process.exit()
+  if !opts.path
+    console.error "Please sepcific [ path ] in the confiuration file!"
+    process.exit()
+
+
   # check watch target file exists
   if not fs.existsSync opts.path
     console.error "Error: "
     console.log "\tDirectory '#{ opts.path }' to watch is not Exist!"
     return
-
 
   # init local
   console.warn "[Beta Mode Enable: works well on linux]" if opts.beta
@@ -40,11 +50,9 @@ startWatch = (opts)->
   console.log "\tWatching : '#{opts.path}'"
   console.log "\tConnect to: '#{opts.host}'"
   console.warn "\tSync File To: '#{opts.pathto}'"
-
-  #console.log "\tConnecting ... '#{opts.host}'"
   console.log ""
-  # init server
 
+  # init server
   remote.connect opts.host, opts.pathto, opts.force, opts.debug
 
   #init flie filter
@@ -65,7 +73,7 @@ startWatch = (opts)->
 
   watch opts.path,
     stable: !opts.beta
-    withHidden: opts.hidden
+    withHidden: opts.all
   , (e)->
     #filter ignored files
     if preCheck (path.basename(e.filename))
@@ -82,8 +90,6 @@ startWatch = (opts)->
         remote.mkdir e.filename
       when 'change', 'create'
         remote.save e.filename, e.oid
-        if (path.basename e.filename)[0...3] is 'jch'
-          jch.parse(e.filename)
       when 'delete', 'rmdir'
         remote.delete e.filename, e.oid
       when 'mvfile', 'mvdir'
@@ -105,15 +111,15 @@ initMain = ()->
 
   program
     .option('', '')
-    .option('resolve', 'resolve file conflict through svn')
+    #.option('resolve', 'resolve file conflict through svn')
     .option('config', 'modify configuration file')
     .option('', '')
     .option('-p, --path <dir>', 'specifies dir path to be watched')
     .option('-f, --force', 'force sync mode, without checking file\'s MD5')
-    .option('-h, --hidden', 'watch hidden files and dirs as well')
+    .option('-a, --all', 'watch hidden files and dirs as well')
     .option('-b, --beta', 'beta version, only stable on linux')
     .option('-d, --debug', 'show more detailed debug info')
-    .version('0.0.19', '-v, --version')
+    .version('0.0.21', '-v, --version')
 
 
   params = program.parse(process.argv)
@@ -121,7 +127,6 @@ initMain = ()->
   conf = config.load( path.resolve('.m3dsync_config') )
   # first running this program, will ask user to input configuration informatin rather than start watching
   if conf
-    #
     for key, value of conf
       params[key] ?= value
 

@@ -52,7 +52,11 @@ remote =
         logPrefix = "[#{(new Date()).toTimeString().slice(0, 8)}] Server: >>>"
 
       res.on 'data', (chunk)->
-        data = JSON.parse chunk
+        try
+          data = JSON.parse chunk
+        catch
+          console.error "connected server doesn't support 'nodesync', please check if the [ host ] configuration is correct!"
+          process.exit()
         switch data.code
           when 22001 then console.error  "#{logPrefix} #{data.msg}"
           when 22000 then console.info "#{logPrefix} #{data.msg}"
