@@ -1,6 +1,6 @@
 {
   "name": "nodesync",
-  "version": "0.0.22",
+  "version": "0.0.25",
   "description": "node scripts for watching changed files and dirs then post them to remote server",
   "main": "./lib/nodesync",
   "directories": {
@@ -12,8 +12,9 @@
   "dependencies": {
     "MD5": "~1.1.0",
     "form-data": "~0.1.0",
-    "watch-project": "~0.0.4",
-    "commander": "~0.6.0"
+    "watch-project": "~0.0.5",
+    "commander": "~0.6.0",
+    "coffess": "~0.0.1"
   },
   "devDependencies": {},
   "scripts": {

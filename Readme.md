@@ -73,8 +73,10 @@ OS X系统默认ulimit被设置成256（查看方式：ulimit -n）,调大该值
 ## TODO
 - 自动冲突解决、冲突提示强制覆盖
 - 离线文件改动监测
+- 修复win下监测大量文件时CPU占用较高的问题
 
 
 # change log
-2. 0.0.10 add file filter feature
 1. 0.0.7 add stable mode (using "chokidar") for supporting old version of nodejs(0.8) and OSX(10.7)
+2. 0.0.10 add file filter feature
+3. 0.0.25 add `nodesync -l` option for local testing
