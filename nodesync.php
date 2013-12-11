@@ -70,7 +70,7 @@ function delete_file($file) {
     if(strlen($file) > $pathto_len && substr($file, 0, $pathto_len) == $pathto){
         exec('rm -rf ' . escapeshellarg($file),  $retval);
     }
-    return $retval == 0; // UNIX commands return zero on success
+    return !($retval == 0); // UNIX commands return zero on success
 }
 
 function echojson($msg = 'no message.', $status = 22000){

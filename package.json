@@ -14,7 +14,7 @@
     "form-data": "~0.1.0",
     "watch-project": "~0.0.5",
     "commander": "~0.6.0",
-    "coffess": "~0.0.1"
+    "coffess": "~0.0.3"
   },
   "devDependencies": {},
   "scripts": {
